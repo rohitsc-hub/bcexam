@@ -1,0 +1,2248 @@
+﻿Prac1:-
+
+
+Q1.Addition of Two Number
+add.js
+const c = require('crypto')
+class Block {
+    constructor(id,n1,n2,t,ph="" ){
+        this.id=id;
+        this.n1=n1;
+        this.n2=n2;
+        this.sum=n1+n2;
+        this.ph=ph;
+        this.h=this.callHash();
+    }
+    callHash(){
+        return c.createHash('sha256').update(this.id+this.t+this.n1+this.n2+this.sum+this.ph).digest('hex');
+    }
+}
+class Blockchain{
+    constructor(){
+        this.chain=[this.Gblock()];
+    }
+    Gblock(){
+        return new Block(1,0,0,Date.now);
+    }
+    getCblock(){
+        return this.chain[this.chain.length-1];
+    }
+    addBlock(b){
+        b.ph = this.getCblock().h;
+        b.h = b.callHash();
+        this.chain.push(b)
+    }
+}
+module.exports.Block= Block;
+module.exports.Blockchain=Blockchain;
+
+
+test.js
+const{Block,Blockchain}=require('./add')
+let m= new Blockchain();
+console.log('Developed by Harshvrdhan Ranmale');
+m.addBlock( new Block(2,4,5,Date.now()));
+m.addBlock( new Block(5,48,58,Date.now()));
+m.addBlock( new Block(34,89,50,Date.now()));
+console.log(JSON.stringify(m,null,5));
+
+
+Command
+node test.js
+
+
+Q.2 Prime Number
+prime.js
+const c=require('crypto');
+class Block{
+    constructor(id,n1,t,ph=""){
+        this.id=id;
+        this.n1=n1;
+        this.ans=this.checkPrime();
+        this.ph=ph;
+        this.h=this.calHash();
+    }
+    checkPrime(){
+        let n = this.n1;
+        if (n<=1){
+            return "not prime";
+        }
+        for(let i = 2;i<n;i++){
+            if (n%i == 0){
+                return "not prime";
+                          } 
+        }
+        return "prime";
+    }
+    calHash(){
+       return c.createHash('sha256').update(this.id+this.t+this.n1+this.ans+this.ph).digest('hex'); 
+    }
+}
+class Blockchain{
+    constructor(){
+        this.chain=[this.Gblock()];
+    }
+    Gblock(){
+        return new Block(1,0,Date.now);
+    }
+    getCblock(){
+        return this.chain[this.chain.length-1];
+    }
+    addBlock(b){
+        b.ph = this.getCblock().h;
+        b.h=b.calHash();
+        this.chain.push(b)
+    }
+}
+module.exports.Block= Block;
+module.exports.Blockchain=Blockchain;
+
+
+test.js
+const{Block,Blockchain}=require('./prime')
+let m= new Blockchain();
+console.log('Developed by ');
+m.addBlock( new Block(2,4,5,Date.now()));
+m.addBlock( new Block(5,48,58,Date.now()));
+m.addBlock( new Block(34,89,50,Date.now()));
+console.log(JSON.stringify(m,null,5));
+
+
+
+
+Q.3 Happy Number (if happy then add in chain else dont) 
+happy.js
+const crypto = require('crypto');
+class Block {
+    constructor(id, n, ans, t, ph ="") {
+        this.id = id; this.n= n; this.ans = ans; this.t = t; this.ph = ph; this.h= this.calHash();
+    }
+    calHash() {
+        return crypto.createHash('sha256').update(this.id +this.n +this.ans +this.t +this.ph).digest('hex');
+    }
+}
+class Blockchain {
+    constructor() {
+        this.chain = [this.GBlock()];
+    }
+    GBlock() {
+        return new Block(1,0,Date.now);
+    }
+    getCBlock() {
+        return this.chain[this.chain.length - 1];
+    }
+    addBlock(b) {
+        b.ph = this.getCBlock().h;
+        b.h = b.calHash();
+        this.chain.push(b);
+    }
+}
+function isHappy(n) {
+    let seen = new Set();
+    while (n !== 1 && !seen.has(n)) {
+        seen.add(n);
+        let sum = 0;
+        while (n > 0) {
+            let digit = n % 10;
+            sum += digit * digit;
+            n = Math.floor(n / 10);
+        }
+        n = sum;
+    }
+    return n === 1;
+}
+module.exports = { Block, Blockchain, isHappy };
+
+
+test.js
+const { Block, Blockchain, isHappy } = require('./happy');
+const m = new Blockchain();
+const n = 13;
+if (isHappy(n)) {
+    m.addBlock(new Block(2, n, "Happy Number", Date.now()));
+}
+console.log(JSON.stringify(m, null, 2));
+
+
+Prac2:-
+
+
+Q.1] Write a Python program to implement a simple blockchain for identifying Armstrong numbers and verify the validity of the blockchain. (153)
+armstrong.py
+import hashlib
+import datetime
+class Block:
+    def __init__(self, i, n, ph):
+        self.i, self.n = i, n
+        self.t = str(datetime.datetime.now())
+        self.r = "Armstrong number" if n == sum(int(d)**len(str(n)) for d in str(n)) else "not Armstrong number"
+        self.ph = ph
+        self.h = self.calhash()
+    def calhash(self):
+        data = str(self.i) + self.t + str(self.n) + self.r + self.ph
+        return hashlib.sha256(data.encode()).hexdigest()
+class Blockchain:
+    def __init__(self):
+        self.chain = [Block(0, 0, "0")]
+    def addBlock(self, n):
+        self.chain.append(Block(len(self.chain), n, self.chain[-1].h))
+    def display(self):
+        for b in self.chain:
+            print("Block:", b.i)
+            print("Timestamp:", b.t)
+            print("Original number:", b.n)
+            print("Result:", b.r)
+            print("Previous hash:", b.ph)
+            print("Current Hash:", b.h)
+            print("-" * 95)
+    def is_valid(self):
+        return all(
+            b.h == b.calhash() and b.ph == self.chain[i-1].h
+            for i, b in enumerate(self.chain[1:], 1)
+        )
+p = Blockchain()
+for n in [12, 153, 9563]:
+    p.addBlock(n)
+p.display()
+print("Chain valid:", p.is_valid())
+
+
+Command
+python armstrong.py
+Q.2] WAP TO CREATE A BLOCK TO CHECK WHETHER THE TWO STATEMENTS ARE ANAGRAM OR NOT.
+anagram.py
+import hashlib
+import datetime
+class Block:
+    def __init__(s, i, str1, str2, t, ph):
+        s.i = i
+        s.t = str(datetime.datetime.now())
+        s.str1 = str1
+        s.str2 = str2
+        s.r = s.check()
+        s.ph = ph
+        s.h = s.calhash()
+    def calhash(s):
+        data = str(s.i) + s.t + s.str1 + s.str2 + s.r + s.ph
+        return hashlib.sha256(data.encode()).hexdigest()
+    def check(s):
+        a = s.str1.replace(" ", "").lower()
+        b = s.str2.replace(" ", "").lower()
+        if sorted(a) == sorted(b):
+            return "Anagram"
+        else:
+            return "Not Anagram"
+class Blockchain:
+    def __init__(s):
+        s.chain = [s.createGBLock()]
+    def createGBLock(s):
+        return Block(0, "", "", "0", "0")
+    def addBlock(s, str1, str2):
+        ph = s.chain[-1].h
+        b = Block(len(s.chain), str1, str2, "", ph)
+        s.chain.append(b)
+    def display(s):
+        for b in s.chain:
+            print("Block:", b.i)
+            print("Timestamp:", b.t)
+            print("Statement 1:", b.str1)
+            print("Statement 2:", b.str2)
+            print("Result:", b.r)
+            print("Previous hash:", b.ph)
+            print("Current Hash:", b.h)
+            print("-" * 95)
+    def is_valid(s):
+        for idx in range(1, len(s.chain)):
+            cur = s.chain[idx]
+            prev = s.chain[idx - 1]
+            if cur.h != cur.calhash():
+                return False
+            if cur.ph != prev.h:
+                return False
+        return True
+p = Blockchain()
+p.addBlock("listen", "silent")
+p.addBlock("hello", "world")
+p.addBlock("The eyes", "They see")
+p.display()
+print("Chain valid:", p.is_valid())
+
+
+Command
+Python anagram.py
+Q.3] WAP to create a blockchain for basic banking transactions such as account creation, deposit, and withdrawal, where the user can select the desired transaction and maintain the account balance.
+banking.py 
+import hashlib
+import datetime
+class Block:
+    def __init__(s, i, acc, act, amt, ph):
+        s.i, s.acc, s.act, s.amt, s.ph = i, acc, act, amt, ph
+        s.t = str(datetime.datetime.now())
+        s.h = hashlib.sha256(
+            (str(i)+s.t+acc+act+str(amt)+ph).encode()
+        ).hexdigest()
+class Blockchain:
+    def __init__(s):
+        s.chain = [Block(0, "GENESIS", "Create", 0, "0")]
+        s.accounts = {}
+    def add(s, acc, act, amt):
+        if act == "Account Created":
+            if acc in s.accounts:
+                print("Account already exists")
+                return
+            s.accounts[acc] = 0
+            print("Account created successfully")
+        elif acc not in s.accounts:
+            print("Account does not exist")
+            return
+        elif act == "Deposit":
+            s.accounts[acc] += amt
+            print("Deposit successful")
+            print("Balance:", s.accounts[acc])
+        elif act == "Withdraw":
+            if amt > s.accounts[acc]:
+                print("Insufficient balance")
+                return
+            s.accounts[acc] -= amt
+            print("Withdrawal successful")
+            print("Balance:", s.accounts[acc])
+        s.chain.append(Block(len(s.chain), acc, act, amt, s.chain[-1].h))
+    def display(s):
+        for b in s.chain:
+            print("Block:", b.i)
+            print("Account:", b.acc)
+            print("Action:", b.act)
+            print("Amount:", b.amt)
+            print("Timestamp:", b.t)
+            print("Previous Hash:", b.ph)
+            print("Current Hash:", b.h)
+            print("-" * 95)
+    def balance(s, acc):
+        if acc in s.accounts:
+            print("Account:", acc)
+            print("Balance:", s.accounts[acc])
+        else:
+            print("Account does not exist")
+p = Blockchain()
+acc = input("Enter account number: ")
+p.add(acc, "Account Created", 0)
+while True:
+    print("\n1.Deposit  2.Withdraw  3.Exit")
+    c = input("Enter choice: ")
+    if c == "1":
+        p.add(acc, "Deposit", float(input("Amount: ")))
+    elif c == "2":
+        p.add(acc, "Withdraw", float(input("Amount: ")))
+    elif c == "3":
+        break
+    else:
+        print("Invalid choice")
+print("\nFinal Balance:")
+p.balance(acc)
+print("\nBlockchain:")
+p.display()
+
+
+
+
+
+
+
+
+
+
+
+
+Prac3:-
+Q2.Write a smart contract in Solidity to perform basic arithmetic operations such as addition, subtraction, multiplication, and division. 
+
+
+arithmetic.sol
+
+
+pragma solidity ^0.8.21;
+contract ari{
+    function add(int a, int b)public pure returns(int){
+        return(a+b);
+    }
+    function sub(int a, int b)public pure returns(int){
+        return(a-b);
+    }
+    function multi(int a, int b)public pure returns(int){
+        return(a*b);
+    }
+    function divide(int a, int b)public pure returns(int){
+        return(a/b);
+    }
+}
+
+
+
+
+Go to Remix > add file > "Compile" > “Deploy”
+
+
+
+
+Q3. Write a smart contract in Solidity to store and display student details using a structure. 
+
+
+student.sol
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.21;
+contract studentC{
+    struct StudentD{
+        uint sid;
+        string name;
+        string add;
+    }
+    StudentD s;
+    function addStudent(uint i, string memory n, string memory a)public{
+        s.sid=i;
+        s.name=n;
+        s.add=a;
+    }
+    function getS() public view returns(uint,string memory, string memory){
+        return(s.sid,s.name,s.add);
+    }
+}
+
+
+
+
+Q4.Write a smart contract in Solidity to store, retrieve, and update employee details using a structure and mapping. 
+
+
+employee.sol
+
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.21;
+contract Employee {
+    struct EmployeeData {
+        uint id;
+        string name;
+        uint salary;
+        string dept;
+    }
+    mapping(uint => EmployeeData) private employees;
+    function addEmployee(uint id, string memory name, uint salary, string memory dept) public {
+        employees[id] = EmployeeData(id, name, salary, dept);
+    }
+
+
+    function updateSalary(uint id, uint salary) public {
+        employees[id].salary = salary;
+    }
+    function getEmployee(uint id) public view returns (uint, string memory, uint, string memory) {
+        EmployeeData memory emp = employees[id];
+        return (emp.id, emp.name, emp.salary, emp.dept);
+    }
+}
+
+
+
+
+Q5.Write a smart contract in Solidity to check whether a given number is a palindrome or not.
+
+
+palindrome.sol
+
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.21;
+contract Palindrome{
+    function check(uint n)public pure returns (string memory){
+        uint r;
+        uint rev=0;
+        uint n1=n;
+        while(n!=0){
+            r=n%10;
+            rev=rev*10+r;
+            n=n/10;
+        }
+        if(rev==n1)
+        return "Pallindrome";
+        else
+        return "not Pallindrome";
+    }
+}
+Prac4:-
+Q.1 Create a structure of a user with information like User Account no, username, and balance with following function create account, deposit amount, withdraw amount, and get balance.
+
+
+banking.sol
+
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.21;
+
+
+contract  bank{
+    struct user{
+        uint acno;
+        string name;
+        uint balance;
+    }
+    
+    mapping(uint => user) public u;
+    function CreateAcc(uint acNumber, string memory name, uint b) public {
+        u[acNumber]=user(acNumber,name,b);
+    }
+
+
+    function dep(uint acn, uint am) public{
+        u[acn].balance=u[acn].balance+am;
+    }
+    function withdraw(uint acn, uint am) public{
+        require(u[acn].balance>=am, "Insufficient Balance");
+        u[acn].balance=u[acn].balance-am;
+    }
+}
+
+
+
+
+Q.2 WRITE A PROGRAM TO DEMONSTRATE PERFECT NUMBER IN SOLIDITY 
+
+
+perfect.sol
+
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.21;
+
+
+contract Perfect{
+    function per(uint n) public pure returns(string memory){
+        if(n<=1){
+            return "Not Perfect";
+        }
+        uint sum=1;
+        for(uint i=2;i<=n/2;i++){
+            if(n%i==0){
+                sum+=i;
+            }
+        }
+        if(sum==n){
+            return "Perfect number";
+        }
+        else{
+            return "Not Perfect";
+        }
+    }
+}
+
+
+
+
+Q.3 Write a program for the Voting System.
+
+
+voting.sol
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.21;
+
+
+contract voting {
+    string[] public candidates;
+    constructor(string[] memory names) {
+        candidates = names;
+    }
+
+
+    mapping(string => uint) public countvotes;
+    mapping(address => bool) public voterAddress;
+
+
+    function vote(string memory c) public {
+        require(!voterAddress[msg.sender], "you have alredy voted");
+        bool ce = false;
+        for (uint i = 0; i < candidates.length; i++) {
+            if (keccak256(bytes(c)) == keccak256(bytes(candidates[i]))) {
+                ce = true;
+                break;
+            }
+        }
+        require(ce, "Condidate dows not exists");
+        countvotes[c]++;
+        voterAddress[msg.sender] = true;
+    }
+
+
+    function getWinner() public view returns (string memory) {
+        string memory w;
+        uint t = 0;
+        for (uint i = 0; i < candidates.length; i++) {
+            if (countvotes[candidates[i]] > t) {
+                t = countvotes[candidates[i]];
+                w = candidates[i];
+            }
+        }
+        return w;
+    }
+}
+
+
+Prac5:-
+Q.1.Write a Solidity smart contract to deposit Ether into a contract and transfer Ether from the contract to another account.
+Description: The smart contract BankC demonstrates Ether transactions using Solidity. The deposit() function is declared as payable, allowing Ether to be sent to the contract. The amount of Ether sent with the transaction is accessed using msg.value.
+The transferE() function accepts a payable address of the recipient. It checks whether the contract has sufficient Ether balance using address(this).balance and then transfers the specified amount to the recipient using the transfer() method.
+The contract can be compiled and deployed using the Remix IDE. Ether can first be deposited into the contract using the deposit() function, after which a recipient address and transfer amount can be provided to transfer Ether to another account.
+
+
+ether.js
+
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.21;
+contract BankC {
+    function deposit() public payable {}
+
+
+    function transferE(address payable receiver, uint amount) public {
+        require(address(this).balance >= amount, "Insufficient balance");
+        receiver.transfer(amount);
+    }
+}
+
+
+Execution Steps:-
+Compile > Deploy (change Gas limit to ‘custom’ 3000000) > Deployments Contracts (set Value to 5 ether) > Deposit Transact >Change the Value to 0 again > Transfer E (Set the wallet address, ether amount uint256) >Transact
+ 
+
+
+
+
+Q.2. Write a Solidity smart contract using a Student structure to store student details and marks, and implement functions to add students, count students, display student details, calculate grades and retrieve the details of a particular student.
+
+
+
+
+Description: The smart contract StudentGrade defines a Student structure containing the student's ID, name, address, age, and an array of marks. A mapping stud_id associates each student ID with its corresponding student details.
+The addStudent() function adds a new student and prevents duplicate student IDs using require(). The studentIds array stores the IDs separately so that all students can be accessed using a loop, while studentCount keeps track of the total number of students.
+The totalStudent() function returns the total number of students. The getAllStudents() function returns the details of all students. The getGrade() function calculates the average of the student's marks and returns a grade based on the average marks. The displayDetail() function returns the complete details of a particular student using the student's ID.
+The contract is written using Solidity version 0.8.21 and can be compiled and deployed using the Remix IDE.
+
+
+Student.sol
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.21;
+
+
+contract StudentGrade {
+    struct Student {
+        uint id;
+        string name;
+        string address_;
+        uint age;
+        uint[] marks;
+    }
+
+
+    Student[] public students;
+
+
+    function addStudent(uint id, string memory name, string memory addr, uint age, uint[] memory marks) public {
+        students.push(Student(id, name, addr, age, marks));
+    }
+
+
+    function displayStudent() public view returns (Student[] memory) {
+        return students;
+    }
+
+
+    function countStudents() public view returns (uint) {
+        return students.length;
+    }
+
+
+    function getGrade(uint id) public view returns (string memory) {
+        for (uint i = 0; i < students.length; i++) {
+            if (students[i].id == id) {
+                uint total = 0;
+
+
+                if (students[i].marks.length == 0)
+                    return "No marks";
+
+
+                for (uint j = 0; j < students[i].marks.length; j++)
+                    total += students[i].marks[j];
+
+
+                uint avg = total / students[i].marks.length;
+
+
+                if (avg >= 90) return "Grade: A+";
+                if (avg >= 80) return "Grade: A";
+                if (avg >= 70) return "Grade: B";
+                if (avg >= 60) return "Grade: C";
+                if (avg >= 50) return "Grade: D";
+                return "Grade: F";
+            }
+        }
+        return "Student not found";
+    }
+
+
+    function getStudent(uint id) public view returns (uint, string memory, string memory, uint, uint[] memory) {
+        for (uint i = 0; i < students.length; i++) {
+            if (students[i].id == id) {
+                Student memory s = students[i];
+                return (s.id, s.name, s.address_, s.age, s.marks);
+            }
+        }
+        revert("Student not found");
+    }
+}
+
+
+Execution steps:-
+Compile > Deploy (change Gas limit to ‘custom’ 3000000) > Deployments Contracts (Enter all the fields and check all the Functions) > students(uint256) (Make sure to add index values in this function) 
+
+
+________________
+Prac6:-
+
+
+Q.1 Create a contract to make quiz questions,answer them, check total number of correct answers and total number of incorrect answers. 
+
+
+kbc.sol
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.21;
+contract quiz{
+    struct Question{
+        string Qtest;
+        string CA;
+    }    
+    Question[] public q;
+    uint public tc;
+    uint public tw;
+    event AnswerE(string qu, string uans, bool isc);
+
+
+    function add(string memory qt, string memory cans) public {
+        q.push(Question(qt,cans));
+    }
+function ansO(uint i,string memory uans) public{
+    require(i<q.length,"Invalidquestion index");
+    if(keccak256(bytes(uans)) == keccak256(bytes(q[i].CA))){
+        tc++;
+        emit AnswerE(q[i].Qtest, uans, true);
+    }
+    else {
+        tw++;
+        emit AnswerE(q[i].Qtest, uans, false);
+    }
+    }
+}
+
+
+Execution Steps: same as above
+Q.2 Create a contract to showcase Single Inheritance
+
+
+Si.sol
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.21;
+
+
+contract Vehicle{
+    string vehType;
+    string nt;
+    constructor(string memory t, string memory n){
+        vehType=t;
+        nt=n;
+    }   
+    function disp() public view returns (string memory, string memory){
+        return (vehType,nt);
+    }
+}
+
+
+contract Bike is Vehicle{
+    string brandname;
+    string color;
+    constructor (string memory t, string memory n, string memory bn, string memory c)Vehicle(t,n){
+        brandname=bn;
+        color=c;
+    }
+    function dispB() public view returns (string memory, string memory){
+        disp();
+        return (brandname, color);
+    }
+}
+
+
+Execution Steps:
+Compile > Deploy [Bike and Vehicle] (change Gas limit to ‘custom’ 3000000) > Deployments Contracts > IN Bike (Enter t(vehicle type),nt(write ‘Vehicle’),bn(brand name),c(color)) > Deploy >Go to Deployed Contracts > First Call “disp” and then “dispb”
+
+
+Q.3 Create a contract to showcase multiple inheritance. 
+mi.sol
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.21;
+contract p1{
+    string name;
+    constructor(string memory n){
+        name=n;
+    }
+}
+contract p2{
+    string p2name;
+    constructor(string memory n){
+        p2name=n;
+    }
+}
+contract child is p1,p2{
+    string Cname;
+    constructor (string memory n1,string memory n2,string memory n3)p1(n1) p2(n2){
+        Cname=n3;
+    }
+    function disp() public view returns(string memory,string memory,string memory){
+        return (p1.name,p2.p2name,Cname);
+    }
+}
+
+
+Execution Steps:
+Compile > Deploy [p1,p1,child] (change Gas limit to ‘custom’ 3000000) > after Child deploy > Deployments Contracts > Enter Values
+
+
+
+
+
+
+Prac7:-
+Create a Dapp for addition
+
+
+Soo first in vs create an folder and then in terminal 
+
+
+node --version(if version is not visible download and add the bin tak ka part)
+npm install -g truffle
+npx truffle init
+
+
+Keep ur ganache open
+
+
+Folder Structure:
+
+
+BC PRACSSSS/
+│
+├── build/
+│   └── contracts/
+│       └── Addition.json
+│
+├── contracts/
+│   ├── .gitkeep
+│   └── add.sol
+│
+├── migrations/
+│   ├── .gitkeep
+│   └── 1_deploy.js
+│
+├── test/
+│   └── .gitkeep
+│
+├── app.js
+├── index.html
+└── truffle-config.js
+
+
+Create addition.sol          (ye contracts naam ke folder me daal na )
+
+
+//SPDX-License-Identifier: MIT
+pragma solidity ^0.8.21;
+contract addition{
+    function add(uint a, uint b) public pure returns (uint){
+        return a+b;
+    }
+}
+
+
+1_deploy.js         (ye migration folder mei aayega)
+const addition = artifacts.require("addition");
+module.exports = function (deployer) {
+    deployer.deploy(addition);
+};
+
+
+
+
+npx truffle compile
+[If it will show an error then]
+In truffle-config.js file
+
+
+Uncomment Line 67 to 71 (in line 69 change port to 7545)
+Also 111 to 117 (in line 116 change  evmVersion: "paris")
+
+
+npx truffle compile
+Truffle migrate(iss mei se tumlog ko contract address milega for app.js)
+
+
+After this command now u can see that an build named folder is created in that u will see addition.json file from here u will get the abi thing we add in app .js so now create app.js
+app.js aur index.html truffle config.js file ke sath hona chaiye 
+
+
+app.js in this 
+let web3;
+let contract;
+const contractAddress =
+    "0x0C334e7642DeF4F8F18381cBa7468C2a64c364cD";
+const contractABI = [
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "a",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "b",
+          "type": "uint256"
+        }
+      ],
+      "name": "add",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function",
+      "constant": true
+    }
+  ];
+async function addNumbers() {
+    try {
+        // Connect Web3
+        if (typeof window.ethereum === "undefined") {
+            alert("Please install MetaMask");
+            return;
+        }
+
+
+        web3 = new Web3(window.ethereum);
+        // Request MetaMask account
+        const accounts = await window.ethereum.request({
+            method: "eth_requestAccounts"
+        });
+        console.log("Account:", accounts[0]);
+        // Create contract
+        contract = new web3.eth.Contract(
+            contractABI,
+            contractAddress
+        );
+        console.log("Contract:", contract);
+     // Get numbers
+        const num1 =
+            document.getElementById("num1").value;
+        const num2 =
+            document.getElementById("num2").value;
+        if (num1 === "" || num2 === "") {
+            alert("Enter both numbers");
+            return;
+        }
+        // Call smart contract
+        const result = await contract.methods
+            .add(num1, num2)
+            .call();
+        document.getElementById("result").innerText =
+            result;
+    } catch (error) {
+        console.error(error);
+        alert("Error: " + error.message);
+    }
+}
+
+
+
+
+
+
+Index.html
+
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Addition DApp</title>
+  <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+</head>
+<body>
+  <h1>Addition DApp</h1>
+  <label>Number 1:</label>
+  <input type="number" id="num1">
+  <br><br>
+  <label>Number 2:</label>
+  <input type="number" id="num2">
+  <br><br>
+  <button onclick="addNumbers()">Add</button>
+  <p>Result: <span id="result"></span></p>
+  <script src="app.js"></script>
+</body>
+</html>
+
+
+
+
+
+
+Now download an live server extension then in the bottom right u will see goo live click on that then go to http://127.0.0.1:5500/ url 
+
+
+
+
+Prac8:-
+
+
+
+
+Dapp for prime number or not 
+
+
+Soo first in vs create an folder and then in terminal 
+
+
+node –version(if version is not visible download and add the bin tak ka part)
+
+
+npm install -g truffle
+
+
+npx truffle init
+
+
+Keep ur ganache open
+
+
+Create Prime.sol (ye contracts naam ke folder me daal na )
+
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+
+contract Prime {
+    function checkPrime(uint n) public pure returns (bool) {
+        if (n < 2)
+            return false;
+
+
+        for (uint i = 2; i < n; i++) {
+            if (n % i == 0)
+                return false;
+        }
+
+
+        return true;
+    }
+} 
+
+
+
+
+2_deploy.js(ye migration folder mei aayega)
+
+
+const Prime = artifacts.require("Prime");
+
+
+module.exports = function(deployer) {
+    deployer.deploy(Prime);
+};
+
+
+npx truffle compile
+It will show an error then
+In truffle-config.js file
+
+
+Uncomment Line 67 to 71 (in line 69 change port to 7545)
+Also 111 to 117 (in line 116 change  evmVersion: "paris")
+
+
+npx truffle compile
+Truffle migrate(iss mei se tumlog ko contract address milega for app.js)
+
+
+After this command now u can see that an build named folder is created in that u will see prime.json file from here u will get the abi thing we add in add.js so now create add.js, index.html and crete client name folder in that put index.html and add.js
+
+
+add.js
+
+
+
+
+let web3 = new Web3("http://127.0.0.1:7545");
+
+
+let address = "0x342A1D322e173509804EC7d67DC36Af51c930553";
+
+
+let abi = [
+    {
+        "inputs": [
+            {
+                "internalType": "uint256",
+                "name": "n",
+                "type": "uint256"
+            }
+        ],
+        "name": "checkPrime",
+        "outputs": [
+            {
+                "internalType": "bool",
+                "name": "",
+                "type": "bool"
+            }
+        ],
+        "stateMutability": "pure",
+        "type": "function",
+        "constant": true
+    }
+];
+
+
+let contract = new web3.eth.Contract(abi, address);
+
+
+async function check() {
+    let n = document.getElementById("num").value;
+
+
+    if (n === "") {
+        alert("Please enter a number");
+        return;
+    }
+
+
+    try {
+        let result = await contract.methods.checkPrime(n).call();
+
+
+        document.getElementById("result").innerHTML =
+            result ? "Prime Number" : "Not a Prime Number";
+
+
+    } catch (error) {
+        console.error(error);
+        alert("Error: " + error.message);
+    }
+}
+
+
+
+
+
+
+
+
+
+
+
+
+index.html
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Prime Number DApp</title>
+</head>
+<body>
+
+
+    <h2>Prime Number Checker</h2>
+
+
+    <input type="number" id="num">
+
+
+    <button onclick="check()">Check</button>
+
+
+    <p id="result"></p>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+
+
+    <script src="app.js"></script>
+
+
+</body>
+</html>
+
+
+
+
+Now download an live server extension then in the bottom right u will see goo live click on that then go to http://127.0.0.1:5500/ url 
+
+
+
+
+
+
+
+
+Prac9:-
+
+
+voting
+Soo first in vs create an folder and then in terminal 
+
+
+node –version(if version is not visible download and add the bin tak ka part)
+
+
+npm install -g truffle
+
+
+npx truffle init
+
+
+Keep ur ganache open
+
+
+Create Voting.sol (ye contracts naam ke folder me daal na )
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.21;
+
+
+
+
+contract Voting {
+    uint public c1;
+    uint public c2;
+
+
+
+
+    mapping(address => bool) public voters;
+
+
+
+
+    function voteC1() public {
+        require(!voters[msg.sender], "Already voted");
+        voters[msg.sender] = true;
+        c1++;
+    }
+
+
+
+
+    function voteC2() public {
+        require(!voters[msg.sender], "Already voted");
+        voters[msg.sender] = true;
+        c2++;
+    }
+
+
+
+
+    function getVotes() public view returns (uint, uint) {
+        return (c1, c2);
+    }
+}
+
+
+1_deploy.js(ye migration folder mei aayega)
+
+
+const voting = artifacts.require("Voting");
+
+
+
+
+module.exports = function(deployer) {
+    deployer.deploy(voting);
+};
+
+
+
+
+npx truffle compile
+It will show an error then
+In truffle-config.js file
+
+
+Uncomment Line 67 to 71 (in line 69 change port to 7545)
+Also 111 to 117 (in line 116 change  evmVersion: "paris")
+
+
+npx truffle compile
+Truffle migrate(iss mei se tumlog ko contract address milega for app.js)
+
+
+After this command now u can see that an build named folder is created in that u will see prime.json file from here u will get the abi thing we add in add.js so now create add.js, index.html and crete client name folder in that put index.html and add.js
+
+
+
+
+app.js
+
+
+let web3, contract, account;
+const address = "0xDF4e865E939413011F88897aC25c82Aee5928864";
+const abi = [
+    {
+      "inputs": [],
+      "name": "c1",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    },
+    {
+      "inputs": [],
+      "name": "c2",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    },
+    {
+      "inputs": [
+        {
+          "internalType": "address",
+          "name": "",
+          "type": "address"
+        }
+      ],
+      "name": "voters",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    },
+    {
+      "inputs": [],
+      "name": "voteC1",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "voteC2",
+      "outputs": [],
+      "stateMutability": "nonpayable",
+      "type": "function"
+    },
+    {
+      "inputs": [],
+      "name": "getVotes",
+      "outputs": [
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        },
+        {
+          "internalType": "uint256",
+          "name": "",
+          "type": "uint256"
+        }
+      ],
+      "stateMutability": "view",
+      "type": "function",
+      "constant": true
+    }
+  ];
+
+
+async function connect() {
+    try {
+        if (!window.ethereum) throw new Error("Please install MetaMask.");
+
+
+        try {
+            await ethereum.request({
+                method: "wallet_switchEthereumChain",
+                params: [{ chainId: "0x539" }]
+            });
+        } catch (e) {
+            if (e.code !== 4902) throw e;
+
+
+            await ethereum.request({
+                method: "wallet_addEthereumChain",
+                params: [{
+                    chainId: "0x539",
+                    chainName: "Ganache Localhost 7545",
+                    nativeCurrency: { name: "Ether", symbol: "ETH", decimals: 18 },
+                    rpcUrls: ["http://127.0.0.1:7545"]
+                }]
+            });
+        }
+
+
+        account = (await ethereum.request({
+            method: "eth_requestAccounts"
+        }))[0];
+
+
+        web3 = new Web3(ethereum);
+
+
+        if (Number(await web3.eth.net.getId()) !== 5777)
+            throw new Error("Connect to Ganache network.");
+
+
+        contract = new web3.eth.Contract(abi, address);
+
+
+        document.getElementById("account").innerText = "Connected: " + account;
+        document.getElementById("status").innerText = "Wallet connected successfully.";
+
+
+        await getVotes();
+
+
+    } catch (e) {
+        document.getElementById("status").innerText = e.message;
+    }
+}
+
+
+async function vote1() {
+    await castVote("voteC1");
+}
+async function vote2() {
+    await castVote("voteC2");
+}
+async function castVote(method) {
+    try {
+        if (!contract) await connect();
+        if (!contract) return;
+
+
+        document.getElementById("status").innerText = "Confirm the transaction in MetaMask.";
+
+
+        await contract.methods[method]().send({ from: account });
+
+
+        document.getElementById("status").innerText = "Vote submitted successfully!";
+        await getVotes();
+
+
+    } catch (e) {
+        document.getElementById("status").innerText = e.message || "Voting failed.";
+    }
+}
+
+
+async function getVotes() {
+    try {
+        if (!contract) {
+            await connect();
+            return;
+        }
+
+
+        const votes = await contract.methods.getVotes().call();
+
+
+        document.getElementById("c1").innerText = votes[0];
+        document.getElementById("c2").innerText = votes[1];
+
+
+    } catch (e) {
+        document.getElementById("status").innerText = e.message;
+    }
+}
+
+
+if (window.ethereum) {
+    ethereum.on("accountsChanged", accounts => {
+        if (!accounts.length) {
+            account = contract = null;
+            document.getElementById("account").innerText = "Wallet not connected";
+            document.getElementById("status").innerText = "Connect your wallet.";
+        } else {
+            connect();
+        }
+    });
+}
+
+
+
+
+Index.html
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Voting DApp</title>
+</head>
+<body>
+
+
+    <h1>Voting DApp</h1>
+
+
+    <button onclick="connect()">Connect Wallet</button>
+    <p id="account">Wallet not connected</p>
+
+
+    <h2>Candidate 1</h2>
+    <button onclick="vote1()">Vote C1</button>
+    <p>Votes: <span id="c1">0</span></p>
+
+
+    <h2>Candidate 2</h2>
+    <button onclick="vote2()">Vote C2</button>
+    <p>Votes: <span id="c2">0</span></p>
+
+
+    <button onclick="getVotes()">Refresh Votes</button>
+
+
+    <p id="status"></p>
+
+
+    <script src="https://cdn.jsdelivr.net/npm/web3@1.10.4/dist/web3.min.js"></script>
+    <script src="app.js?v=2"></script>
+
+
+</body>
+</html>
+
+
+
+
+
+
+Now download an live server extension then in the bottom right u will see goo live click on that then go to http://127.0.0.1:5500/ url 
+
+
+
+
+Prac10:-
+Q.1) Develop a solidity smart contract for an online shopping system
+1.Create a base contract product with product id,prod_name,price and stock
+2.Initialize the product details using constructor
+3.Create a derived contract online store that inherits from product
+4.Implement a purchase product function that accepts ether as payment
+5.Use require to check the stock and the payment
+
+
+Code:
+Product.sol
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.21;
+
+
+contract Product {
+    uint pid;
+    uint price;
+    uint stock;
+    string pname;
+
+
+    constructor(uint i, uint p, uint s, string memory n) {
+        pid = i;
+        price = p;
+        stock = s;
+        pname = n;
+    }
+
+
+    function displayProduct() public view returns (uint, uint, uint, string memory) {
+        return (pid, price, stock, pname);
+    }
+}
+
+
+contract OnlineStore is Product {
+
+
+    constructor(uint i, uint p, uint s, string memory n)
+        Product(i, p, s, n) {}
+
+
+    function purchaseProduct(uint quantity) public payable {
+        require(stock >= quantity, "Insufficient stock");
+        require(msg.value == price * quantity, "Incorrect payment");
+
+
+        stock -= quantity;
+    }
+}
+
+
+Deploy OnlineShop Only.
+
+
+
+
+Q.2) Develop solidity smart contract student course registration
+1.Create a base contract person with student name and student id
+2.Initialize the details using constructor
+3.Create a derive contract student that inherits from person 
+4.Store the course name,fee and maximum seat capacity
+5.Implement a function to register a student for a course
+6.Registration will reject if seats are full or the student is already registered
+
+
+Student.sol
+
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.21;
+
+
+contract Person {
+    struct StudentInfo {
+        string name;
+        uint id;
+    }
+
+
+    mapping(uint => StudentInfo) public students;
+}
+
+
+contract Student is Person {
+    string public courseName;
+    uint public fee;
+    uint public maxSeats;
+    uint public totalRegistered;
+
+
+    mapping(uint => bool) public registered;
+
+
+    constructor(string memory course, uint f, uint seats) {
+        courseName = course;
+        fee = f;
+        maxSeats = seats;
+    }
+
+
+    function registerCourse(uint id, string memory name) public {
+        require(!registered[id], "Already registered");
+        require(totalRegistered < maxSeats, "Seats full");
+
+
+        registered[id] = true;
+        students[id] = StudentInfo(name, id);
+        totalRegistered++;
+    }
+}
+
+
+
+
+Prac11:-
+Q.1 Vehicle Rental System with Function Overriding
+Create a parent contract Rental with a function "calculateRent(uint daysRented)".
+Create two child contracts:
+1. CarRental
+2. BikeRental
+Requirements:
+a. Set the rental agency name in the parent constructor.
+b. Mark the parent calculation function as "virtual".
+c. Override it in both child contracts with different daily rental rates.
+d. Emit a "VehicleRented" event when a rental is recorded.
+e. Expected practices: virtual, override, inheritance, and events. 
+
+
+Rental.sol
+
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.21;
+
+
+contract Rental {
+    string public agencyName = "Rental Agency";
+    event VehicleRented(string, uint);
+
+
+    function calculateRent(uint daysRented)
+        public
+        virtual
+    {
+        emit VehicleRented("Select type",0*daysRented);
+    }
+}
+
+
+contract CarRental is Rental {
+    function calculateRent(uint daysRented) public override {
+        uint ppd = 10000;
+        uint price = ppd * daysRented;
+        emit VehicleRented("car",price);
+       
+    }
+    function payRent(uint daysRented) public payable {
+        uint ppd = 10000;
+        uint price = ppd * daysRented;
+
+
+        require(daysRented > 0, "Invalid rental days");
+        require(msg.value == price,"Incorrect payment");
+    }
+}
+
+
+contract BikeRental is Rental {
+    function calculateRent(uint daysRented) public override {
+    
+        uint ppd = 3000;
+        uint price = ppd * daysRented;
+        emit VehicleRented("bike",price);
+    }
+    function payRent(uint daysRented) public payable {
+        uint ppd = 3000;
+        uint price = ppd * daysRented;
+
+
+        require(daysRented > 0, "Invalid rental days");
+        require(msg.value == price,"Incorrect payment");
+    }
+}
+
+
+
+
+Q.2 Crowdfunding Contract
+Create a crowdfunding contract with an owner and a funding goal.
+Requirements:
+* Initialize the owner and funding goal using a constructor.
+* Let users contribute ETH.
+* Emit a ContributionReceived event for every contribution.
+* Emit a GoalReached event when the total reaches the goal.
+* Allow refunds if the campaign fails after its deadline.
+* Use a parent contract for campaign details and a child contract for contribution logic.
+Funding.sol
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.21;
+
+
+contract Crowdfunding {
+    address public owner;
+    uint public fundingGoal;
+    uint public deadline;
+    uint public totalFunds;
+
+
+    event ContributionReceived(address, uint);
+    event GoalReached(uint);
+
+
+    constructor(uint _fundingGoal, uint _duration) {
+        owner = msg.sender;
+        fundingGoal = _fundingGoal;
+        deadline = block.timestamp + _duration;
+    }
+
+
+    function dispo() public view returns (address) {
+        return owner;
+    }
+}
+
+
+contract CrowdfundingCampaign is Crowdfunding {
+
+
+    constructor(uint _fundingGoal, uint _duration)
+        Crowdfunding(_fundingGoal, _duration) {}
+
+
+    function contribute() public payable {
+        require(block.timestamp < deadline, "Campaign ended");
+        require(msg.value > 0, "Invalid contribution");
+
+
+        totalFunds += msg.value;
+        emit ContributionReceived(msg.sender, msg.value);
+
+
+        if (totalFunds >= fundingGoal) {
+            emit GoalReached(totalFunds);
+        }
+    }
+
+
+    function refund() public payable {
+        require(block.timestamp >= deadline, "Campaign not ended");
+        require(totalFunds < fundingGoal, "Goal reached");
+
+
+        uint amount = address(this).balance;
+        payable(msg.sender).transfer(amount);
+    }
+}
+
+
+
+
+Prac12:-
+Create a Basic Solidity Contract using for addition of 2 numbers using Hardhat.
+
+
+
+
+Create folder in vs code then run this command
+
+
+
+
+npm install --save-dev hardhat
+npx hardhat --init (ye enter karne par path ka option aayega enter press)
+(Select Minimal Project in it)
+
+
+Replace the hardhat.config.ts with 
+
+
+import { defineConfig } from "hardhat/config";
+import toolbox from "@nomicfoundation/hardhat-toolbox-mocha-ethers";
+export default defineConfig({
+    plugins: [toolbox],
+    solidity: {
+        version: "0.8.34",
+    },
+});
+Thne run this command
+
+
+npm install --save-dev @nomicfoundation/hardhat-toolbox-mocha-ethers
+
+
+npx hardhat compile
+
+
+Now create an contracts named folder and in that create an file named Addition.sol
+
+
+Addition.sol
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.21;
+
+
+contract Addition {
+    function add(uint a, uint b) public pure returns (uint) {
+        return a + b;
+    }
+}
+
+
+
+
+Now create an folder ignition then in ignition folder create folders named modules and deployments then an file named in modules Addition.js
+
+
+Addition.js
+
+
+import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
+
+
+export default buildModule("AdditionModule", (m) => {
+    const addition = m.contract("Addition");
+    return { addition };
+});
+
+
+Now create an folder named test then an file named Addition.cjs
+
+
+Addition.cjs
+const { expect } = require("chai");
+const { ethers } = require("hardhat");
+
+
+describe("Addition", function () {
+    it("should add two numbers", async function () {
+        const addition = await ethers.deployContract("Addition");
+        expect(await addition.add(10, 20)).to.equal(30);
+    });
+});
+
+
+
+
+
+
+Now create two files app.js and index.html in our project folder only 
+
+
+app.js 
+let contract;
+let provider;
+const address = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+const abi = [
+    "function add(uint a, uint b) public pure returns (uint)"
+];
+
+
+async function connect() {
+    try {
+        if (!window.ethereum)
+            throw new Error("Install MetaMask");
+
+
+        await window.ethereum.request({
+            method: "eth_requestAccounts"
+        });
+
+
+        await window.ethereum.request({
+            method: "wallet_switchEthereumChain",
+            params: [{ chainId: "0x7a69" }]
+        });
+        provider = new ethers.BrowserProvider(window.ethereum);
+        contract = new ethers.Contract(address, abi, provider);
+
+
+        const signer = await provider.getSigner();
+        document.getElementById("account").innerText =
+            "Connected: " + await signer.getAddress();
+        document.getElementById("status").innerText =
+            "Wallet connected successfully!";
+    } catch (e) {
+        document.getElementById("status").innerText = e.message;
+    }
+}
+
+
+async function addNumbers() {
+    try {
+        if (!contract) {
+            document.getElementById("status").innerText =
+                "Connect wallet first.";
+            return;
+        }
+        const a = document.getElementById("num1").value;
+        const b = document.getElementById("num2").value;
+
+
+        if (a === "" || b === "" || Number(a) < 0 || Number(b) < 0)
+            throw new Error("Enter valid positive numbers.");
+        const sum = await contract.add(BigInt(a), BigInt(b));
+
+
+        document.getElementById("result").innerText = sum.toString();
+        document.getElementById("status").innerText =
+            "Addition successful!";
+    } catch (e) {
+        document.getElementById("status").innerText = e.message;
+    }
+}
+
+
+Index.html
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Addition DApp</title>
+</head>
+<body>
+    <h1>Addition DApp</h1>
+    <button onclick="connect()">Connect Wallet</button>
+    <p id="account">Wallet not connected</p>
+
+
+
+
+    <h2>Add Two Numbers</h2>
+    <input type="number" id="num1" placeholder="Enter first number">
+    <br><br>
+    <input type="number" id="num2" placeholder="Enter second number">
+    <br><br>
+    <button onclick="addNumbers()">Add</button>
+   
+    <h3>Result: <span id="result">0</span></h3>
+    <p id="status"></p>
+
+
+
+
+    <script src="https://cdn.jsdelivr.net/npm/ethers@6.13.5/dist/ethers.umd.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
+
+
+
+
+npx hardhat compile
+npx hardhat ignition deploy ignition/modules/Addition.js
+npx hardhat node
+(create an new custom network in that add RPC url as http://127.0.0.1:8545/ and then create the custom network then u can use the private key and get 10000k eth tokes)
+
+
+Open new terminal:
+npx hardhat ignition deploy ignition/modules/Addition.js --network localhost
+At the Bottom Right > Click “Go Live”  (Live Server)
+
+
+And then this url http://127.0.0.1:5500/
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+Prac13:-
+
+
+Create a DAPP for perfect number using hardhat 
+
+
+Create folder then run this command
+
+
+npm install --save-dev hardhat
+
+
+npx hardhat --init
+
+
+Now make changes in hardhat.config.ts
+import { defineConfig } from "hardhat/config";
+import HardhatIgnitionEthersPlugin from "@nomicfoundation/hardhat-ignition-ethers";
+export default defineConfig({
+    plugins: [HardhatIgnitionEthersPlugin],
+    solidity: "0.8.28"
+});
+
+
+npm install --save-dev @nomicfoundation/hardhat-toolbox-mocha-ethers
+
+
+npm install ethers vite
+
+
+npx hardhat compile
+
+
+Now create an folder named contracts in that create file PerfectNumber.sol
+
+
+PerfectNumber.sol
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.24;
+contract PerfectNumber {
+    function checkPerfectNumber(uint n) public pure returns (bool) {
+        require(n > 0, "Enter positive number");
+        uint sum = 0;
+        for (uint i = 1; i < n; i++) {
+            if (n % i == 0) {
+                sum += i;
+            }
+        }
+        return sum == n;
+    }
+}
+
+
+
+
+Now create an folder named ignition and in that folder create folders as  modules and deployments and in modules create file PerfectNumber.ts
+
+
+PerfectNumber.ts
+import { buildModule } from "@nomicfoundation/hardhat-ignition/modules";
+export default buildModule("PerfectNumberModule", (m) => {
+    const contract = m.contract("PerfectNumber");
+    return { contract };
+});
+
+
+Now create an folder named frontend in that create this two files index.html and main.js
+
+
+index.html
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Perfect Number Checker</title>
+</head>
+<body>
+    <h1>Perfect Number Checker</h1>
+    <input type="number" id="num" placeholder="Enter a number" min="1">
+    <button id="checkBtn">Check</button>
+    <h2 id="result"></h2>
+    <script type="module" src="./main.js"></script>
+</body>
+</html>
+
+
+main.js
+import { ethers } from "ethers";
+const contractAddress = "0x5fbdb2315678afecb367f032d93f642f64180aa3";
+const ABI = [
+    "function checkPerfectNumber(uint256 n) pure returns (bool)"
+];
+const button = document.getElementById("checkBtn");
+const input = document.getElementById("num");
+const output = document.getElementById("result");
+button.addEventListener("click", async () => {
+    try {
+        const n = input.value.trim();
+        if (!/^[1-9]\d*$/.test(n))
+            throw new Error("Enter a positive integer.");
+        if (!window.ethereum)
+            throw new Error("Please install MetaMask.");
+        await window.ethereum.request({ method: "eth_requestAccounts" });
+        const provider = new ethers.BrowserProvider(window.ethereum);
+
+
+        if ((await provider.getNetwork()).chainId !== 31337n)
+            throw new Error("Connect to Hardhat Local.");
+        if (await provider.getCode(contractAddress) === "0x")
+            throw new Error("Contract not found. Deploy again.");
+        const contract = new ethers.Contract(contractAddress, ABI, provider);
+        const result = await contract.checkPerfectNumber(BigInt(n));
+        output.innerText = result ? "Perfect Number" : "Not a Perfect Number";
+    } catch (error) {
+        console.error(error);
+        output.innerText = error.shortMessage || error.message;
+    }
+});
+
+
+
+
+Now run 
+
+
+npx hardhat compile
+npx hardhat node
+(create an new custom network in that add RPC url as http://127.0.0.1:8545/ and then create the custom network then u can use the private key and get 10000k eth tokes)
+New Terminal:
+npx hardhat ignition deploy ignition/modules/PerfectNumber.ts --network localhost
+npx vite frontend
+(copy URL for output, No need to do GO LIVE) 
+
+
+
+
+
+
+       Extra code for pratice
+Armstrong No. in js
+const c = require('crypto');
+class Block {
+    constructor(id, n1, t, ph = "") { this.id = id;
+        this.n1 = n1;
+        this.t = t;
+        this.ans = this.checkArmstrong();
+        this.ph = ph;
+        this.h = this.calHash();
+    }
+    checkArmstrong() {
+        let n = this.n1;
+        let digits = String(n).length;
+        let temp = n;
+        let sum = 0;
+        if (n < 0) return "Not Armstrong";
+        while (temp > 0) {
+            let r = temp % 10;
+            sum += r ** digits;
+            temp = Math.floor(temp / 10);
+        }
+        return sum == n ? "Armstrong" : "Not Armstrong";
+    }
+    calHash() {
+        return c.createHash('sha256').update(this.id + this.t + this.n1 + this.ans + this.ph).digest('hex');
+    }
+}
+class Blockchain {
+    constructor() {
+        this.chain = [this.Gblock()];
+    }
+    Gblock() {
+        return new Block(1, 0, Date.now(), "0");
+    }
+    getCblock() {
+        return this.chain[this.chain.length - 1];
+    }
+    addBlock(b) {
+        b.ph = this.getCblock().h;
+        b.h = b.calHash();
+        this.chain.push(b);
+    }
+}
+module.exports.Block = Block;
+module.exports.Blockchain = Blockchain;
+
+
+
+
+test.js
+const { Block, Blockchain } = require('./armstrongNo');
+let m = new Blockchain();
+m.addBlock(new Block(2, 153, Date.now()));
+m.addBlock(new Block(3, 48, Date.now()));
+m.addBlock(new Block(4, 370, Date.now()));
+console.log(JSON.stringify(m, null, 5));
