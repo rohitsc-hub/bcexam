@@ -2246,3 +2246,199 @@ m.addBlock(new Block(2, 153, Date.now()));
 m.addBlock(new Block(3, 48, Date.now()));
 m.addBlock(new Block(4, 370, Date.now()));
 console.log(JSON.stringify(m, null, 5));
+
+
+
+
+Krishnamurthy no. in js
+
+const c = require('crypto');
+class Block {
+    constructor(id, n1, t, ph = "") {
+        this.id = id;
+        this.n1 = n1;
+        this.t = t;
+        this.ans = this.checkKrishnamurthy();
+        this.ph = ph;
+        this.h = this.calHash();
+    }
+
+    checkKrishnamurthy() {
+        let n = this.n1;
+        let temp = n;
+        let sum = 0;
+        if (n < 0) return "Not Krishnamurthy";
+        while (temp > 0) {
+            let r = temp % 10;
+            let fact = 1;
+            for (let i = 1; i <= r; i++) {
+                fact *= i;
+            }            sum += fact;
+            temp = Math.floor(temp / 10);
+        }
+        return sum == n ? "Krishnamurthy" : "Not Krishnamurthy";
+    }
+    calHash() {
+        return c.createHash('sha256')
+            .update(this.id + this.t + this.n1 + this.ans + this.ph)
+            .digest('hex');
+    }
+}
+
+class Blockchain {
+    constructor() {
+        this.chain = [this.Gblock()];
+    }
+    Gblock() {
+        return new Block(1, 0, Date.now(), "0");
+    }
+    getCblock() {
+        return this.chain[this.chain.length - 1];
+    }
+    addBlock(b) {
+        b.ph = this.getCblock().h;
+        b.h = b.calHash();
+        this.chain.push(b);
+    }
+}
+module.exports.Block = Block;
+module.exports.Blockchain = Blockchain;
+
+
+test.js
+
+const { Block, Blockchain } = require('./krishna');
+let m = new Blockchain();
+m.addBlock(new Block(2, 145, Date.now()));
+m.addBlock(new Block(3, 123, Date.now()));
+m.addBlock(new Block(4, 40585, Date.now()));
+console.log(JSON.stringify(m, null, 5));
+
+
+
+Q. Krishnamurthy no. in Dapp using Ganache
+
+Prac8
+│
+├── build
+│   └── contracts
+│       ├── Krishnamurthy.json
+│       └── Prime.json
+│
+├── client
+│   └── index.html     (Create)
+│
+├── contracts
+│   ├── .gitkeep
+│   └── Krishna.sol      (Create)
+│
+├── migrations
+│   ├── .gitkeep
+│   └── 2_deploy.js     (Create)
+│
+├── test
+│   └── .gitkeep
+│
+└── truffle-config.js
+
+
+Krishna.sol
+
+
+// SPDX-License-Identifier: MIT
+pragma solidity ^0.8.0;
+
+contract Krishnamurthy {
+    function checkKrishnamurthy(uint n) public pure returns (bool) {
+        uint temp = n;
+        uint sum = 0;
+
+        if (n == 0) return false;
+        while (temp > 0) {
+            uint r = temp % 10;
+            uint fact = 1;
+            for (uint i = 1; i <= r; i++) {
+                fact *= i;
+            }
+            sum += fact;
+            temp = temp / 10;
+        }
+        return sum == n;
+    }
+}
+
+
+index.html
+
+
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Krishnamurthy Number DApp</title>
+</head>
+<body>
+
+<h2>Krishnamurthy Number Checker</h2>
+
+<input type="number" id="num">
+<button onclick="check()">Check</button>
+
+<p id="result"></p>
+
+<script src="https://cdn.jsdelivr.net/npm/web3@1.10.0/dist/web3.min.js"></script>
+
+<script>
+
+let web3 = new Web3("http://127.0.0.1:7545");
+let address = "0x815743eced74571FDccD55e3F5e1F93b00F0b614";
+let abi = [
+    {
+      "inputs": [
+        {
+          "internalType": "uint256",
+          "name": "n",
+          "type": "uint256"
+        }
+      ],
+      "name": "checkKrishnamurthy",
+      "outputs": [
+        {
+          "internalType": "bool",
+          "name": "",
+          "type": "bool"
+        }
+      ],
+      "stateMutability": "pure",
+      "type": "function",
+      "constant": true
+    }
+  ];
+
+let contract = new web3.eth.Contract(abi, address);
+async function check() {
+    let n = document.getElementById("num").value;
+    if (n === "" || Number(n) <= 0) {
+        document.getElementById("result").innerHTML =
+            "Enter a positive number";
+        return;
+    }
+
+    let result = await contract.methods.checkKrishnamurthy(n).call();
+    document.getElementById("result").innerHTML =
+        result ? "Krishnamurthy" : "Not Krishnamurthy";
+}
+
+</script>
+</body>
+</html>
+
+
+2_deploy.js
+
+const Krishnamurthy = artifacts.require("Krishnamurthy");
+module.exports = function(deployer) {
+    deployer.deploy(Krishnamurthy);
+};
+
+
+
